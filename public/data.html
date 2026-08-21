@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lost & Found - All Items</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #2c7a7b; color: white; }
+    .pagination { text-align: center; margin-top: 20px; }
+    .pagination button { padding: 8px 14px; margin: 0 5px; cursor: pointer; }
+    .pagination button:disabled { background: #ccc; cursor: not-allowed; }
+    #pageInfo { margin: 0 10px; }
+  </style>
+</head>
+<body>
+  <h2>All Lost & Found Items</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Item Name</th>
+        <th>Description</th>
+        <th>Location</th>
+        <th>Date</th>
+        <th>Contact</th>
+      </tr>
+    </thead>
+    <tbody id="itemsTable"></tbody>
+  </table>
+
+  <div class="pagination">
+    <button id="prevBtn">Previous</button>
+    <span id="pageInfo"></span>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    const limit = 5;
+
+    async function loadItems(page) {
+      const response = await fetch(`/api/items?page=${page}&limit=${limit}`);
+      const data = await response.json();
+
+      const tbody = document.getElementById('itemsTable');
+      tbody.innerHTML = '';
+
+      data.items.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.itemName}</td>
+          <td>${item.description}</td>
+          <td>${item.location}</td>
+          <td>${item.date ? item.date.split('T')[0] : ''}</td>
+          <td>${item.contactInfo || '-'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('pageInfo').textContent = `Page ${data.currentPage} of ${data.totalPages || 1}`;
+      document.getElementById('prevBtn').disabled = data.currentPage <= 1;
+      document.getElementById('nextBtn').disabled = data.currentPage >= data.totalPages;
+
+      currentPage = data.currentPage;
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentPage > 1) loadItems(currentPage - 1);
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      loadItems(currentPage + 1);
+    });
+
+    loadItems(currentPage);
+  </script>
+</body>
+</html>

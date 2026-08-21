@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Report Lost or Found Item</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; }
+    h2 { text-align: center; }
+    input, textarea { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
+    button { width: 100%; padding: 10px; background: #2c7a7b; color: white; border: none; cursor: pointer; }
+    #message { text-align: center; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Report Lost & Found Item</h2>
+  <form id="itemForm">
+    <input type="text" id="itemName" placeholder="Item Name" required>
+    <textarea id="description" placeholder="Description" required></textarea>
+    <input type="text" id="location" placeholder="Location" required>
+    <input type="date" id="date">
+    <input type="text" id="contactInfo" placeholder="Contact Info">
+    <button type="submit">Submit</button>
+  </form>
+  <p id="message"></p>
+
+  <script>
+    document.getElementById('itemForm').addEventListener('submit', async function(e) {
+      e.preventDefault(); // Step A: page reload atkano
+
+      const data = {
+        itemName: document.getElementById('itemName').value,
+        description: document.getElementById('description').value,
+        location: document.getElementById('location').value,
+        date: document.getElementById('date').value,
+        contactInfo: document.getElementById('contactInfo').value
+      };
+
+      try {
+        const response = await fetch('/api/items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          document.getElementById('message').textContent = 'Item submitted successfully!';
+          document.getElementById('itemForm').reset();
+        } else {
+          document.getElementById('message').textContent = 'Error: ' + result.error;
+        }
+      } catch (err) {
+        document.getElementById('message').textContent = 'Something went wrong.';
+      }
+    });
+  </script>
+</body>
+</html>
